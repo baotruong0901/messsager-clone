@@ -20,7 +20,7 @@ export class UploadImageService {
         return new Promise((resolve, reject) => {
             const upload = v2.uploader.upload_stream((error, result) => {
                 if (error) return reject(error);
-                resolve({ url: result.secure_url });
+                resolve({ url: result?.secure_url! });
             });
             Readable.from(file.buffer).pipe(upload);
         });

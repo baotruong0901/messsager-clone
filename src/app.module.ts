@@ -18,7 +18,7 @@ import { PusherService } from './pusher.service';
         isGlobal: true
       }
     ),
-    MongooseModule.forRoot(process.env.DATABASE_URL),
+    MongooseModule.forRoot(process.env.DATABASE_URL!),
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
     ]),

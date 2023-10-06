@@ -31,7 +31,7 @@ export class ConversationService {
                 const newConversation = new this.conversationModel({
                     name,
                     isGroup,
-                    users: [...members, currentId]
+                    users: [...members!, currentId]
                 })
                 await newConversation.save()
                 await this.conversationModel.populate(newConversation, {
@@ -98,7 +98,7 @@ export class ConversationService {
             })
 
             const updatedMessage = await this.messagesModel.findByIdAndUpdate(
-                conversation.lastMessage,
+                conversation?.lastMessage,
                 {
                     $addToSet: { seens: currentId?._id }
                 },
@@ -110,7 +110,7 @@ export class ConversationService {
             await this.pusherService.trigger(currentId.email!, 'conversation:update', {
                 _id: conversationId,
                 lastMessage: updatedMessage,
-                lastMessageAt: conversation.lastMessageAt
+                lastMessageAt: conversation?.lastMessageAt
             })
 
             await this.pusherService.trigger(conversationId!, 'message:update', updatedMessage);
@@ -212,7 +212,7 @@ export class ConversationService {
         } else {
             // Nếu chưa tồn tại, thêm mới user vào deletedBy
             conversation.deletedBy.push({
-                user: user._id,
+                user: user?._id,
                 deletedAt: new Date(),
             });
         }
@@ -223,12 +223,12 @@ export class ConversationService {
         const payload = {
             _id: conversation._id,
             deletedBy: {
-                user: user._id,
+                user: user?._id,
                 deletedAt: conversation.deletedBy[findDeletedBy].deletedAt,
             },
         };
 
-        await this.pusherService.trigger(user.email!, 'conversation:delete', payload);
+        await this.pusherService.trigger(user?.email!, 'conversation:delete', payload);
 
         return conversation
     }

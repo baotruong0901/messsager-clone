@@ -21,7 +21,7 @@ export class MessagesService {
     async createMessage(currentId: string, data: CreateMessageParamas) {
         const { message, image, conversationId, like } = data
 
-        let newMessage = null
+        let newMessage
 
         if (image) {
             const imageUpload = await this.uploadImageService.uploadFile(image)
@@ -87,11 +87,11 @@ export class MessagesService {
 
 
 
-        const lastMessage = updatedConversation.lastMessage;
+        const lastMessage = updatedConversation?.lastMessage;
 
         await this.pusherService.trigger(conversationId, 'messages:new', newMessage)
 
-        updatedConversation.users.map((user) => {
+        updatedConversation?.users.map((user) => {
             this.pusherService.trigger(user.email!, 'conversation:update', {
                 _id: conversationId,
                 lastMessage,
@@ -99,7 +99,7 @@ export class MessagesService {
             })
         })
 
-        updatedConversation.users.map((user) => {
+        updatedConversation?.users.map((user) => {
             if (user.email) {
                 this.pusherService.trigger(user.email, 'conversation:new', updatedConversation)
             }
@@ -112,7 +112,7 @@ export class MessagesService {
         try {
             const conversation = await this.conversationModel.findById(conversationId)
 
-            const userIsDeleted = conversation.deletedBy.findIndex((item) => item.user.toString() === currentId)
+            const userIsDeleted = conversation?.deletedBy.findIndex((item) => item.user.toString() === currentId)
 
             const messages = await this.messagesModel.find({ conversation: conversationId }).populate({
                 path: 'sender seens',
@@ -122,12 +122,12 @@ export class MessagesService {
             const user = await this.userModel.findById(currentId)
 
             if (!messages) throw new HttpException('Not Found!', 400)
-            const filteredMessages = messages.filter((message) => !message.deleted.includes(user._id))
+            const filteredMessages = messages.filter((message) => !message.deleted.includes(user?._id))
 
             if (userIsDeleted !== -1) {
                 // Hiển thị chỉ tin nhắn mới (sau thời điểm cuộc trò chuyện bị xoá)
-                const deletedAt = conversation.deletedBy[userIsDeleted].deletedAt;
-                const filteredMessages = messages.filter(message => message.createdAt > deletedAt && !message.deleted.includes(user._id))
+                const deletedAt = conversation?.deletedBy[userIsDeleted!].deletedAt;
+                const filteredMessages = messages.filter(message => message.createdAt > deletedAt! && !message.deleted.includes(user?._id))
                 return filteredMessages
             }
 
@@ -166,8 +166,8 @@ export class MessagesService {
         }
 
         if (type === UpdateType.deleted) {
-            if (!message.deleted.includes(user._id)) {
-                message.deleted.push(user._id);
+            if (!message.deleted.includes(user?._id)) {
+                message.deleted.push(user?._id);
             }
         }
 
@@ -180,7 +180,7 @@ export class MessagesService {
         const findConversation = await this.conversationModel.findById(message?.conversation)
 
 
-        if (message.deleted && message.deleted.includes(user._id)) {
+        if (message.deleted && message.deleted.includes(user?._id)) {
             await this.pusherService.trigger(findConversation?._id.toString(), 'message:deleted', message);
         } else {
             await this.pusherService.trigger(findConversation?._id.toString(), 'message:update', message);
@@ -201,7 +201,7 @@ export class MessagesService {
                     path: 'users',
                     select: 'avatar name phone email'
                 }])
-            await findConversation.users.map((user) => {
+            await findConversation?.users.map((user) => {
                 this.pusherService.trigger(user.email!, 'conversation:update', {
                     _id: message?.conversation,
                     lastMessage: message,

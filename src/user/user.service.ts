@@ -138,7 +138,7 @@ export class UserService {
                 accessToken: await jwt.sign(
                     {
                         id
-                    }, process.env.SECRET_KEY,
+                    }, process.env.SECRET_KEY!,
                     {
                         expiresIn: '10h'
                     }
@@ -146,7 +146,7 @@ export class UserService {
                 refreshToken: await jwt.sign(
                     {
                         id
-                    }, process.env.REFRESH_TOKEN_KEY,
+                    }, process.env.REFRESH_TOKEN_KEY!,
                     {
                         expiresIn: '7d'
                     }
